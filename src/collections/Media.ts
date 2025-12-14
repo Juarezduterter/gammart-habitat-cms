@@ -27,16 +27,30 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      //required: true,
+      required: true,
+      label: 'Texte alternatif pour SEO et accessibilité',
     },
     {
-      name: 'caption',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
-        },
-      }),
+      name: 'legende',
+      type: 'text',
+      label: 'Légende descriptive',
+    },
+    {
+      name: 'credit',
+      type: 'text',
+      label: 'Crédit photo si applicable',
+    },
+    {
+      name: 'categorie_media',
+      type: 'select',
+      label: 'Catégorie',
+      options: [
+        { label: 'Réalisation', value: 'realisation' },
+        { label: 'Blog', value: 'blog' },
+        { label: 'Logo', value: 'logo' },
+        { label: 'Icône', value: 'icone' },
+        { label: 'Autre', value: 'autre' },
+      ],
     },
   ],
   upload: {
@@ -47,34 +61,18 @@ export const Media: CollectionConfig = {
     imageSizes: [
       {
         name: 'thumbnail',
-        width: 300,
-      },
-      {
-        name: 'square',
-        width: 500,
-        height: 500,
-      },
-      {
-        name: 'small',
-        width: 600,
+        width: 150,
+        height: 150,
       },
       {
         name: 'medium',
-        width: 900,
+        width: 400,
+        height: 400,
       },
       {
         name: 'large',
-        width: 1400,
-      },
-      {
-        name: 'xlarge',
-        width: 1920,
-      },
-      {
-        name: 'og',
         width: 1200,
-        height: 630,
-        crop: 'center',
+        height: 1200,
       },
     ],
   },

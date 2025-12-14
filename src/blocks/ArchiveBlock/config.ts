@@ -47,12 +47,16 @@ export const Archive: Block = {
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
       },
-      defaultValue: 'posts',
+      defaultValue: 'articles',
       label: 'Collections To Show',
       options: [
         {
-          label: 'Posts',
-          value: 'posts',
+          label: 'Articles',
+          value: 'articles',
+        },
+        {
+          label: 'Réalisations',
+          value: 'realisations',
         },
       ],
     },
@@ -64,7 +68,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Categories To Show',
-      relationTo: 'categories',
+      relationTo: 'categories-blog',
     },
     {
       name: 'limit',
@@ -84,7 +88,7 @@ export const Archive: Block = {
       },
       hasMany: true,
       label: 'Selection',
-      relationTo: ['posts'],
+      relationTo: ['articles', 'realisations'],
     },
   ],
   labels: {

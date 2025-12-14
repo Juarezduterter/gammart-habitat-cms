@@ -68,10 +68,14 @@ export interface Config {
   blocks: {};
   collections: {
     pages: Page;
-    posts: Post;
     media: Media;
-    categories: Category;
     users: User;
+    zones: Zone;
+    'types-travaux': TypesTravaux;
+    'categories-blog': CategoriesBlog;
+    'tags-blog': TagsBlog;
+    realisations: Realisation;
+    articles: Article;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -90,10 +94,14 @@ export interface Config {
   };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    zones: ZonesSelect<false> | ZonesSelect<true>;
+    'types-travaux': TypesTravauxSelect<false> | TypesTravauxSelect<true>;
+    'categories-blog': CategoriesBlogSelect<false> | CategoriesBlogSelect<true>;
+    'tags-blog': TagsBlogSelect<false> | TagsBlogSelect<true>;
+    realisations: RealisationsSelect<false> | RealisationsSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -108,13 +116,18 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
+    'parametres-realisations': ParametresRealisation;
+    'parametres-blog': ParametresBlog;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'parametres-realisations': ParametresRealisationsSelect<false> | ParametresRealisationsSelect<true>;
+    'parametres-blog': ParametresBlogSelect<false> | ParametresBlogSelect<true>;
   };
   locale: null;
   user: User & {
@@ -184,8 +197,12 @@ export interface Page {
                   value: string | Page;
                 } | null)
               | ({
-                  relationTo: 'posts';
-                  value: string | Post;
+                  relationTo: 'articles';
+                  value: string | Article;
+                } | null)
+              | ({
+                  relationTo: 'realisations';
+                  value: string | Realisation;
                 } | null);
             url?: string | null;
             label: string;
@@ -220,13 +237,21 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "articles".
  */
-export interface Post {
+export interface Article {
   id: string;
-  title: string;
-  heroImage?: (string | null) | Media;
-  content: {
+  titre: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * 150-300 caractères
+   */
+  chapeau: string;
+  contenu: {
     root: {
       type: string;
       children: {
@@ -241,32 +266,77 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  authors?: (string | User)[] | null;
-  populatedAuthors?:
+  points_cles?:
     | {
+        point?: string | null;
         id?: string | null;
-        name?: string | null;
       }[]
     | null;
+  categorie: string | CategoriesBlog;
+  tags?: (string | TagsBlog)[] | null;
+  image_principale: string | Media;
+  legende_image?: string | null;
+  galerie?:
+    | {
+        image?: (string | null) | Media;
+        legende?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  afficher_faq?: boolean | null;
+  faq?:
+    | {
+        question?: string | null;
+        reponse?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  realisations_liees?: (string | Realisation)[] | null;
+  articles_lies?: (string | Article)[] | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  mot_cle_principal?: string | null;
+  mots_cles_secondaires?:
+    | {
+        mot_cle?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-blog".
+ */
+export interface CategoriesBlog {
+  id: string;
+  nom: string;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
+  description?: string | null;
+  icone?: (string | null) | Media;
+  /**
+   * Ex: #FF5733
+   */
+  couleur?: string | null;
+  ordre?: number | null;
+  image_header?: (string | null) | Media;
+  actif?: boolean | null;
+  parent?: (string | null) | CategoriesBlog;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | CategoriesBlog;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -274,22 +344,10 @@ export interface Post {
  */
 export interface Media {
   id: string;
-  alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  alt: string;
+  legende?: string | null;
+  credit?: string | null;
+  categorie_media?: ('realisation' | 'blog' | 'logo' | 'icone' | 'autre') | null;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -311,22 +369,6 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
     medium?: {
       url?: string | null;
       width?: number | null;
@@ -336,22 +378,6 @@ export interface Media {
       filename?: string | null;
     };
     large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -389,52 +415,196 @@ export interface FolderInterface {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
+ * via the `definition` "tags-blog".
  */
-export interface Category {
+export interface TagsBlog {
   id: string;
-  title: string;
+  nom: string;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  actif?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "realisations".
  */
-export interface User {
+export interface Realisation {
   id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
+  /**
+   * Ex: "ITE Laine de roche - Strasbourg"
+   */
+  titre: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  date_realisation: string;
+  ville: string;
+  /**
+   * 5 caractères
+   */
+  code_postal: string;
+  departement?: (string | null) | Zone;
+  adresse_complete?: string | null;
+  type_bien: 'maison' | 'appartement' | 'immeuble' | 'local_pro' | 'autre';
+  surface_traitee?: number | null;
+  /**
+   * Ex: "3 semaines"
+   */
+  duree_chantier?: string | null;
+  annee_construction?: number | null;
+  types_travaux: (string | TypesTravaux)[];
+  travaux_details?:
     | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
+        prestation?: (string | null) | TypesTravaux;
+        technique?: string | null;
+        materiaux?: string | null;
+        epaisseur?: string | null;
+        surface?: number | null;
+        description?: string | null;
+        id?: string | null;
       }[]
     | null;
-  password?: string | null;
+  dpe_avant?: ('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'non_renseigne') | null;
+  dpe_apres?: ('A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'non_renseigne') | null;
+  gain_energetique?: number | null;
+  economies_annuelles?: number | null;
+  image_principale: string | Media;
+  photo_avant: string | Media;
+  photo_apres: string | Media;
+  galerie?:
+    | {
+        image?: (string | null) | Media;
+        legende?: string | null;
+        type_photo?: ('avant' | 'apres' | 'pendant' | 'detail') | null;
+        id?: string | null;
+      }[]
+    | null;
+  contexte?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  solution?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  resultats?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  points_cles?:
+    | {
+        point?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  temoignage_actif?: boolean | null;
+  temoignage_texte?: string | null;
+  temoignage_prenom?: string | null;
+  temoignage_note?: number | null;
+  fiche_technique?:
+    | {
+        /**
+         * Ex: "Isolant"
+         */
+        label?: string | null;
+        /**
+         * Ex: "Laine de roche Rockwool"
+         */
+        valeur?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "zones".
+ */
+export interface Zone {
+  id: string;
+  nom: string;
+  code?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  actif?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "types-travaux".
+ */
+export interface TypesTravaux {
+  id: string;
+  /**
+   * Ex: "Isolation Thermique par l'Extérieur"
+   */
+  nom: string;
+  /**
+   * Ex: "ITE"
+   */
+  nom_court?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  description?: string | null;
+  icone?: (string | null) | Media;
+  /**
+   * Ex: #FF5733
+   */
+  couleur?: string | null;
+  ordre?: number | null;
+  actif?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -467,8 +637,12 @@ export interface CallToActionBlock {
                 value: string | Page;
               } | null)
             | ({
-                relationTo: 'posts';
-                value: string | Post;
+                relationTo: 'articles';
+                value: string | Article;
+              } | null)
+            | ({
+                relationTo: 'realisations';
+                value: string | Realisation;
               } | null);
           url?: string | null;
           label: string;
@@ -517,8 +691,12 @@ export interface ContentBlock {
                 value: string | Page;
               } | null)
             | ({
-                relationTo: 'posts';
-                value: string | Post;
+                relationTo: 'articles';
+                value: string | Article;
+              } | null)
+            | ({
+                relationTo: 'realisations';
+                value: string | Realisation;
               } | null);
           url?: string | null;
           label: string;
@@ -565,14 +743,20 @@ export interface ArchiveBlock {
     [k: string]: unknown;
   } | null;
   populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
-  categories?: (string | Category)[] | null;
+  relationTo?: ('articles' | 'realisations') | null;
+  categories?: (string | CategoriesBlog)[] | null;
   limit?: number | null;
   selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string | Post;
-      }[]
+    | (
+        | {
+            relationTo: 'articles';
+            value: string | Article;
+          }
+        | {
+            relationTo: 'realisations';
+            value: string | Realisation;
+          }
+      )[]
     | null;
   id?: string | null;
   blockName?: string | null;
@@ -780,6 +964,31 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -796,8 +1005,12 @@ export interface Redirect {
           value: string | Page;
         } | null)
       | ({
-          relationTo: 'posts';
-          value: string | Post;
+          relationTo: 'articles';
+          value: string | Article;
+        } | null)
+      | ({
+          relationTo: 'realisations';
+          value: string | Realisation;
         } | null);
     url?: string | null;
   };
@@ -832,8 +1045,8 @@ export interface Search {
   title?: string | null;
   priority?: number | null;
   doc: {
-    relationTo: 'posts';
-    value: string | Post;
+    relationTo: 'articles';
+    value: string | Article;
   };
   slug?: string | null;
   meta?: {
@@ -973,20 +1186,36 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | null)
-    | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'zones';
+        value: string | Zone;
+      } | null)
+    | ({
+        relationTo: 'types-travaux';
+        value: string | TypesTravaux;
+      } | null)
+    | ({
+        relationTo: 'categories-blog';
+        value: string | CategoriesBlog;
+      } | null)
+    | ({
+        relationTo: 'tags-blog';
+        value: string | TagsBlog;
+      } | null)
+    | ({
+        relationTo: 'realisations';
+        value: string | Realisation;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: string | Article;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1187,42 +1416,13 @@ export interface FormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  heroImage?: T;
-  content?: T;
-  relatedPosts?: T;
-  categories?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-      };
-  publishedAt?: T;
-  authors?: T;
-  populatedAuthors?:
-    | T
-    | {
-        id?: T;
-        name?: T;
-      };
-  generateSlug?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  caption?: T;
+  legende?: T;
+  credit?: T;
+  categorie_media?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1239,26 +1439,6 @@ export interface MediaSelect<T extends boolean = true> {
     | T
     | {
         thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        square?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        small?:
           | T
           | {
               url?: T;
@@ -1288,47 +1468,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        xlarge?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        og?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  generateSlug?: T;
-  slug?: T;
-  parent?: T;
-  breadcrumbs?:
-    | T
-    | {
-        doc?: T;
-        url?: T;
-        label?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1352,6 +1492,192 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "zones_select".
+ */
+export interface ZonesSelect<T extends boolean = true> {
+  nom?: T;
+  code?: T;
+  generateSlug?: T;
+  slug?: T;
+  actif?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "types-travaux_select".
+ */
+export interface TypesTravauxSelect<T extends boolean = true> {
+  nom?: T;
+  nom_court?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  icone?: T;
+  couleur?: T;
+  ordre?: T;
+  actif?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-blog_select".
+ */
+export interface CategoriesBlogSelect<T extends boolean = true> {
+  nom?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  icone?: T;
+  couleur?: T;
+  ordre?: T;
+  image_header?: T;
+  actif?: T;
+  parent?: T;
+  breadcrumbs?:
+    | T
+    | {
+        doc?: T;
+        url?: T;
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags-blog_select".
+ */
+export interface TagsBlogSelect<T extends boolean = true> {
+  nom?: T;
+  generateSlug?: T;
+  slug?: T;
+  actif?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "realisations_select".
+ */
+export interface RealisationsSelect<T extends boolean = true> {
+  titre?: T;
+  generateSlug?: T;
+  slug?: T;
+  date_realisation?: T;
+  ville?: T;
+  code_postal?: T;
+  departement?: T;
+  adresse_complete?: T;
+  type_bien?: T;
+  surface_traitee?: T;
+  duree_chantier?: T;
+  annee_construction?: T;
+  types_travaux?: T;
+  travaux_details?:
+    | T
+    | {
+        prestation?: T;
+        technique?: T;
+        materiaux?: T;
+        epaisseur?: T;
+        surface?: T;
+        description?: T;
+        id?: T;
+      };
+  dpe_avant?: T;
+  dpe_apres?: T;
+  gain_energetique?: T;
+  economies_annuelles?: T;
+  image_principale?: T;
+  photo_avant?: T;
+  photo_apres?: T;
+  galerie?:
+    | T
+    | {
+        image?: T;
+        legende?: T;
+        type_photo?: T;
+        id?: T;
+      };
+  contexte?: T;
+  solution?: T;
+  resultats?: T;
+  points_cles?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  temoignage_actif?: T;
+  temoignage_texte?: T;
+  temoignage_prenom?: T;
+  temoignage_note?: T;
+  fiche_technique?:
+    | T
+    | {
+        label?: T;
+        valeur?: T;
+        id?: T;
+      };
+  meta_title?: T;
+  meta_description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  titre?: T;
+  generateSlug?: T;
+  slug?: T;
+  chapeau?: T;
+  contenu?: T;
+  points_cles?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  categorie?: T;
+  tags?: T;
+  image_principale?: T;
+  legende_image?: T;
+  galerie?:
+    | T
+    | {
+        image?: T;
+        legende?: T;
+        id?: T;
+      };
+  afficher_faq?: T;
+  faq?:
+    | T
+    | {
+        question?: T;
+        reponse?: T;
+        id?: T;
+      };
+  realisations_liees?: T;
+  articles_lies?: T;
+  meta_title?: T;
+  meta_description?: T;
+  mot_cle_principal?: T;
+  mots_cles_secondaires?:
+    | T
+    | {
+        mot_cle?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1645,8 +1971,12 @@ export interface Header {
                 value: string | Page;
               } | null)
             | ({
-                relationTo: 'posts';
-                value: string | Post;
+                relationTo: 'articles';
+                value: string | Article;
+              } | null)
+            | ({
+                relationTo: 'realisations';
+                value: string | Realisation;
               } | null);
           url?: string | null;
           label: string;
@@ -1674,8 +2004,12 @@ export interface Footer {
                 value: string | Page;
               } | null)
             | ({
-                relationTo: 'posts';
-                value: string | Post;
+                relationTo: 'articles';
+                value: string | Article;
+              } | null)
+            | ({
+                relationTo: 'realisations';
+                value: string | Realisation;
               } | null);
           url?: string | null;
           label: string;
@@ -1683,6 +2017,32 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "parametres-realisations".
+ */
+export interface ParametresRealisation {
+  id: string;
+  titre_page?: string | null;
+  description_page?: string | null;
+  nombre_par_page?: number | null;
+  afficher_filtres?: boolean | null;
+  filtres_actifs?: ('type_travaux' | 'zone' | 'annee')[] | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "parametres-blog".
+ */
+export interface ParametresBlog {
+  id: string;
+  titre_page?: string | null;
+  description_page?: string | null;
+  nombre_par_page?: number | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1734,61 +2094,46 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "parametres-realisations_select".
+ */
+export interface ParametresRealisationsSelect<T extends boolean = true> {
+  titre_page?: T;
+  description_page?: T;
+  nombre_par_page?: T;
+  afficher_filtres?: T;
+  filtres_actifs?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "parametres-blog_select".
+ */
+export interface ParametresBlogSelect<T extends boolean = true> {
+  titre_page?: T;
+  description_page?: T;
+  nombre_par_page?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?:
-      | ({
-          relationTo: 'pages';
-          value: string | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: string | Post;
-        } | null);
+    doc?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
     global?: string | null;
     user?: (string | null) | User;
   };
   output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerBlock".
- */
-export interface BannerBlock {
-  style: 'info' | 'warning' | 'error' | 'success';
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'banner';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CodeBlock".
- */
-export interface CodeBlock {
-  language?: ('typescript' | 'javascript' | 'css') | null;
-  code: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'code';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

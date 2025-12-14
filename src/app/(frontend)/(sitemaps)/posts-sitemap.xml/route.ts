@@ -12,17 +12,12 @@ const getPostsSitemap = unstable_cache(
       'https://example.com'
 
     const results = await payload.find({
-      collection: 'posts',
+      collection: 'articles',
       overrideAccess: false,
       draft: false,
       depth: 0,
       limit: 1000,
       pagination: false,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
       select: {
         slug: true,
         updatedAt: true,
@@ -35,16 +30,16 @@ const getPostsSitemap = unstable_cache(
       ? results.docs
           .filter((post) => Boolean(post?.slug))
           .map((post) => ({
-            loc: `${SITE_URL}/posts/${post?.slug}`,
+            loc: `${SITE_URL}/articles/${post?.slug}`,
             lastmod: post.updatedAt || dateFallback,
           }))
       : []
 
     return sitemap
   },
-  ['posts-sitemap'],
+  ['articles-sitemap'],
   {
-    tags: ['posts-sitemap'],
+    tags: ['articles-sitemap'],
   },
 )
 

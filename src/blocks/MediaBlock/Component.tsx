@@ -30,7 +30,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
   } = props
 
   let caption
-  if (media && typeof media === 'object') caption = media.caption
+  if (media && typeof media === 'object') caption = media.legende
 
   return (
     <div
@@ -59,7 +59,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
             captionClassName,
           )}
         >
-          <RichText data={caption} enableGutter={false} />
+          <p className="text-sm text-muted-foreground">{caption}</p>
         </div>
       )}
     </div>

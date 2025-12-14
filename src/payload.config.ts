@@ -4,13 +4,19 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
-import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import { Zones } from './collections/Zones'
+import { TypesTravaux } from './collections/TypesTravaux'
+import { CategoriesBlog } from './collections/CategoriesBlog'
+import { TagsBlog } from './collections/TagsBlog'
+import { Realisations } from './collections/Realisations'
+import { Articles } from './collections/Articles'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { ParametresRealisations } from './globals/ParametresRealisations'
+import { ParametresBlog } from './globals/ParametresBlog'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
@@ -60,9 +66,19 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [
+    Pages,
+    Media,
+    Users,
+    Zones,
+    TypesTravaux,
+    CategoriesBlog,
+    TagsBlog,
+    Realisations,
+    Articles,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Header, Footer, ParametresRealisations, ParametresBlog],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,
