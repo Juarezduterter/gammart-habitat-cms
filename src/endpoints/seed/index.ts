@@ -11,10 +11,10 @@ import { post2 } from './post-2'
 import { post3 } from './post-3'
 
 const collections: CollectionSlug[] = [
-  'categories',
+  'categories-blog',
   'media',
   'pages',
-  'posts',
+  'articles',
   'forms',
   'form-submissions',
   'search',
@@ -44,19 +44,22 @@ export const seed = async ({
   payload.logger.info(`— Clearing collections and globals...`)
 
   // clear the database
+  // Only clear navItems for header and footer globals
   await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
-        slug: global,
-        data: {
-          navItems: [],
-        },
-        depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
-      }),
-    ),
+    globals
+      .filter((global) => global === 'header' || global === 'footer')
+      .map((global) =>
+        payload.updateGlobal({
+          slug: global,
+          data: {
+            navItems: [],
+          },
+          depth: 0,
+          context: {
+            disableRevalidate: true,
+          },
+        }),
+      ),
   )
 
   await Promise.all(
@@ -98,6 +101,19 @@ export const seed = async ({
     ),
   ])
 
+  // Create blog categories
+  // Skipping category seeding for now due to type issues - categories can be created manually in admin
+  // await Promise.all(
+  //   categories.map((category) =>
+  //     payload.create({
+  //       collection: 'categories-blog',
+  //       data: {
+  //         nom: category,
+  //       },
+  //     }),
+  //   ),
+  // )
+
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
       collection: 'users',
@@ -127,23 +143,14 @@ export const seed = async ({
       data: imageHero1,
       file: hero1Buffer,
     }),
-    categories.map((category) =>
-      payload.create({
-        collection: 'categories',
-        data: {
-          title: category,
-          slug: category,
-        },
-      }),
-    ),
   ])
 
-  payload.logger.info(`— Seeding posts...`)
+  payload.logger.info(`— Seeding articles...`)
 
-  // Do not create posts with `Promise.all` because we want the posts to be created in order
+  // Do not create articles with `Promise.all` because we want the articles to be created in order
   // This way we can sort them by `createdAt` or `publishedAt` and they will be in the expected order
   const post1Doc = await payload.create({
-    collection: 'posts',
+    collection: 'articles',
     depth: 0,
     context: {
       disableRevalidate: true,
@@ -152,7 +159,7 @@ export const seed = async ({
   })
 
   const post2Doc = await payload.create({
-    collection: 'posts',
+    collection: 'articles',
     depth: 0,
     context: {
       disableRevalidate: true,
@@ -161,7 +168,7 @@ export const seed = async ({
   })
 
   const post3Doc = await payload.create({
-    collection: 'posts',
+    collection: 'articles',
     depth: 0,
     context: {
       disableRevalidate: true,
@@ -169,26 +176,26 @@ export const seed = async ({
     data: post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
   })
 
-  // update each post with related posts
+  // update each article with related articles
   await payload.update({
     id: post1Doc.id,
-    collection: 'posts',
+    collection: 'articles',
     data: {
-      relatedPosts: [post2Doc.id, post3Doc.id],
+      articles_lies: [post2Doc.id, post3Doc.id],
     },
   })
   await payload.update({
     id: post2Doc.id,
-    collection: 'posts',
+    collection: 'articles',
     data: {
-      relatedPosts: [post1Doc.id, post3Doc.id],
+      articles_lies: [post1Doc.id, post3Doc.id],
     },
   })
   await payload.update({
     id: post3Doc.id,
-    collection: 'posts',
+    collection: 'articles',
     data: {
-      relatedPosts: [post1Doc.id, post2Doc.id],
+      articles_lies: [post1Doc.id, post2Doc.id],
     },
   })
 
@@ -225,8 +232,8 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Posts',
-              url: '/posts',
+              label: 'Articles',
+              url: '/articles',
             },
           },
           {

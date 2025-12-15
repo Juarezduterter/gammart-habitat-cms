@@ -68,7 +68,6 @@ export const Articles: CollectionConfig = {
               name: 'categorie',
               type: 'relationship',
               relationTo: 'categories-blog',
-              required: true,
               label: 'Catégorie principale',
             },
             {

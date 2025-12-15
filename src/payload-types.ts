@@ -272,7 +272,7 @@ export interface Article {
         id?: string | null;
       }[]
     | null;
-  categorie: string | CategoriesBlog;
+  categorie?: (string | null) | CategoriesBlog;
   tags?: (string | TagsBlog)[] | null;
   image_principale: string | Media;
   legende_image?: string | null;

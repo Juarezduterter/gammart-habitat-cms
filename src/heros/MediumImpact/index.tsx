@@ -33,9 +33,9 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
               priority
               resource={media}
             />
-            {media?.caption && (
+            {media?.legende && (
               <div className="mt-3">
-                <RichText data={media.caption} enableGutter={false} />
+                <p className="text-sm text-muted-foreground">{media.legende}</p>
               </div>
             )}
           </div>

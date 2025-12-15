@@ -7,7 +7,7 @@ export type PostArgs = {
   author: User
 }
 
-export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> = ({
+export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'articles'> = ({
   heroImage,
   blockImage,
   author,
@@ -15,8 +15,7 @@ export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
   return {
     slug: 'digital-horizons',
     _status: 'published',
-    authors: [author],
-    content: {
+    contenu: {
       root: {
         type: 'root',
         children: [
@@ -38,87 +37,6 @@ export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
             indent: 0,
             tag: 'h2',
             version: 1,
-          },
-          {
-            type: 'block',
-            fields: {
-              blockName: 'Disclaimer',
-              blockType: 'banner',
-              content: {
-                root: {
-                  type: 'root',
-                  children: [
-                    {
-                      type: 'paragraph',
-                      children: [
-                        {
-                          type: 'text',
-                          detail: 0,
-                          format: 1,
-                          mode: 'normal',
-                          style: '',
-                          text: 'Disclaimer:',
-                          version: 1,
-                        },
-                        {
-                          type: 'text',
-                          detail: 0,
-                          format: 0,
-                          mode: 'normal',
-                          style: '',
-                          text: ' This content is fabricated and for demonstration purposes only. To edit this post, ',
-                          version: 1,
-                        },
-                        {
-                          type: 'link',
-                          children: [
-                            {
-                              type: 'text',
-                              detail: 0,
-                              format: 0,
-                              mode: 'normal',
-                              style: '',
-                              text: 'navigate to the admin dashboard',
-                              version: 1,
-                            },
-                          ],
-                          direction: 'ltr',
-                          fields: {
-                            linkType: 'custom',
-                            newTab: true,
-                            url: '/admin',
-                          },
-                          format: '',
-                          indent: 0,
-                          version: 3,
-                        },
-                        {
-                          type: 'text',
-                          detail: 0,
-                          format: 0,
-                          mode: 'normal',
-                          style: '',
-                          text: '.',
-                          version: 1,
-                        },
-                      ],
-                      direction: 'ltr',
-                      format: '',
-                      indent: 0,
-                      textFormat: 0,
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  version: 1,
-                },
-              },
-              style: 'info',
-            },
-            format: '',
-            version: 2,
           },
           {
             type: 'heading',
@@ -255,46 +173,6 @@ export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
             format: '',
             version: 2,
           },
-          {
-            type: 'block',
-            fields: {
-              blockName: 'Dynamic Components',
-              blockType: 'banner',
-              content: {
-                root: {
-                  type: 'root',
-                  children: [
-                    {
-                      type: 'paragraph',
-                      children: [
-                        {
-                          type: 'text',
-                          detail: 0,
-                          format: 0,
-                          mode: 'normal',
-                          style: '',
-                          text: "This content above is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
-                          version: 1,
-                        },
-                      ],
-                      direction: 'ltr',
-                      format: '',
-                      indent: 0,
-                      textFormat: 0,
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  version: 1,
-                },
-              },
-              style: 'info',
-            },
-            format: '',
-            version: 2,
-          },
         ],
         direction: 'ltr',
         format: '',
@@ -302,14 +180,14 @@ export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
         version: 1,
       },
     },
-    heroImage: heroImage.id,
-    meta: {
-      description:
-        'Dive into the marvels of modern innovation, where the only constant is change. A journey where pixels and data converge to craft the future.',
-      image: heroImage.id,
-      title: 'Digital Horizons: A Glimpse into Tomorrow',
-    },
-    relatedPosts: [], // this is populated by the seed script
-    title: 'Digital Horizons: A Glimpse into Tomorrow',
+    image_principale: heroImage.id,
+    chapeau:
+      'Dive into the marvels of modern innovation, where the only constant is change. A journey where pixels and data converge to craft the future.',
+    meta_description:
+      'Dive into the marvels of modern innovation, where the only constant is change. A journey where pixels and data converge to craft the future.',
+    meta_image: heroImage.id,
+    meta_title: 'Digital Horizons: A Glimpse into Tomorrow',
+    articles_lies: [], // this is populated by the seed script
+    titre: 'Digital Horizons: A Glimpse into Tomorrow',
   }
 }

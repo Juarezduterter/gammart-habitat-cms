@@ -20,7 +20,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
   }
 
   if (categories && Array.isArray(categories) && categories.length > 0) {
-    const populatedCategories: { id: string | number; title: string }[] = []
+    const populatedCategories: { id: string | number; nom?: string; title?: string }[] = []
     for (const category of categories) {
       if (!category) {
         continue
@@ -52,7 +52,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
     modifiedDoc.categories = populatedCategories.map((each) => ({
       relationTo: 'categories-blog',
       categoryID: String(each.id),
-      title: each.nom || each.title,
+      title: each.nom || each.title || '',
     }))
   }
 
