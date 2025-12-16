@@ -14,27 +14,41 @@ import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
+  try {
+    // Check if DATABASE_URI is available before attempting connection
+    if (!process.env.DATABASE_URI) {
+      console.warn('DATABASE_URI not available during build, skipping static params generation')
+      return []
+    }
 
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
+    const payload = await getPayload({ config: configPromise })
+    const pages = await payload.find({
+      collection: 'pages',
+      draft: false,
+      limit: 1000,
+      overrideAccess: false,
+      pagination: false,
+      select: {
+        slug: true,
+      },
     })
 
-  return params
+    const params = pages.docs
+      ?.filter((doc) => {
+        return doc.slug !== 'home'
+      })
+      .map(({ slug }) => {
+        return { slug }
+      })
+
+    return params || []
+  } catch (error) {
+    // If database connection fails during build (e.g., on Railway),
+    // return empty array to allow build to succeed
+    // Pages will be generated on-demand (SSR) instead of at build time
+    console.warn('Failed to generate static params, pages will be rendered on-demand:', error)
+    return []
+  }
 }
 
 type Args = {

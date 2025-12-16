@@ -68,20 +68,37 @@ Railway détecte automatiquement les commandes via `package.json`:
 
 ## Troubleshooting
 
-### Le build échoue
+### Le build échoue avec "MongoServerError: Command find requires authentication"
 
-- Vérifiez que toutes les variables d'environnement sont définies
-- Consultez les logs dans Railway
+**Ce problème a été résolu automatiquement dans le code.**
 
-### Erreur de connexion MongoDB
+L'application gère maintenant gracieusement l'absence de connexion à la base de données pendant le build. Les pages seront générées dynamiquement (SSR) au runtime au lieu d'être pré-générées au moment du build.
+
+**Note importante:** Sur Railway, la variable `DATABASE_URI` n'est disponible qu'au runtime (pendant l'exécution), pas pendant le build. C'est un comportement normal et l'application fonctionne correctement avec cette configuration.
+
+### Le build échoue pour d'autres raisons
+
+- Vérifiez que `PAYLOAD_SECRET` est bien défini (requis pour le build)
+- Consultez les logs dans Railway pour identifier l'erreur spécifique
+
+### Erreur de connexion MongoDB au runtime
 
 - Vérifiez que `DATABASE_URI` est bien configuré avec `${{MongoDB.MONGO_URL}}`
 - Assurez-vous que le service MongoDB est bien démarré
+- Vérifiez que les deux services (MongoDB et votre app) sont dans le même projet Railway
+
+### "Application failed to respond"
+
+Ce problème peut avoir plusieurs causes:
+1. **Port incorrect:** L'application doit écouter sur le port fourni par Railway (`$PORT`). Ceci est déjà configuré dans `package.json` avec `-p ${PORT:-3000}`.
+2. **Délai de démarrage:** L'application peut prendre quelques secondes à démarrer. Attendez 30-60 secondes après le déploiement.
+3. **Erreur au démarrage:** Consultez les logs de déploiement pour identifier l'erreur.
 
 ### Erreur 404 ou 500
 
-- Vérifiez que `NEXT_PUBLIC_SERVER_URL` correspond à l'URL de votre app Railway
-- Consultez les logs de l'application
+- Vérifiez que `NEXT_PUBLIC_SERVER_URL` correspond à l'URL de votre app Railway (sans slash à la fin)
+- Vérifiez que `DATABASE_URI` est correctement configuré
+- Consultez les logs de l'application pour plus de détails
 
 ## Support
 
