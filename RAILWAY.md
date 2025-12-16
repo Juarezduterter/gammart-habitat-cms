@@ -44,7 +44,20 @@ CRON_SECRET=votre_cron_secret_ici
 PREVIEW_SECRET=votre_preview_secret_ici
 ```
 
-### 4. Déployer
+### 4. Configurer le Health Check
+
+**Important :** Railway utilise un health check pour vérifier que votre application est prête à recevoir du trafic.
+
+1. Dans votre service Railway, allez dans **Settings** → **Deploy**
+2. Dans la section **Health Check**, configurez :
+   - **Health Check Path**: `/api/health`
+   - **Health Check Timeout**: 300 seconds (ou laissez par défaut)
+
+⚠️ **N'utilisez PAS `/admin` comme health check path** car cette route nécessite une connexion à la base de données et peut échouer au démarrage.
+
+L'endpoint `/api/health` est un endpoint simple qui répond immédiatement sans dépendre de la base de données.
+
+### 5. Déployer
 
 Railway déploiera automatiquement votre application.
 
@@ -90,9 +103,10 @@ L'application gère maintenant gracieusement l'absence de connexion à la base d
 ### "Application failed to respond"
 
 Ce problème peut avoir plusieurs causes:
-1. **Port incorrect:** L'application doit écouter sur le port fourni par Railway (`$PORT`). Ceci est déjà configuré dans `package.json` avec `-p ${PORT:-3000}`.
-2. **Délai de démarrage:** L'application peut prendre quelques secondes à démarrer. Attendez 30-60 secondes après le déploiement.
-3. **Erreur au démarrage:** Consultez les logs de déploiement pour identifier l'erreur.
+1. **Health check incorrect:** Si le health check est configuré sur `/admin`, il échouera car cette route dépend de la base de données. **Solution:** Configurez le health check sur `/api/health` (voir section "Configurer le Health Check").
+2. **Port incorrect:** L'application doit écouter sur le port fourni par Railway (`$PORT`). Ceci est déjà configuré dans `package.json` avec `-p ${PORT:-3000}`.
+3. **Délai de démarrage:** L'application peut prendre quelques secondes à démarrer. Attendez 30-60 secondes après le déploiement.
+4. **Erreur au démarrage:** Consultez les logs de déploiement pour identifier l'erreur.
 
 ### Erreur 404 ou 500
 
